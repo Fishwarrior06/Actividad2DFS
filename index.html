@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AbogadosAust</title>
+</head>
+<body>
+
+    <h1>Lista de Tareas de los abogados</h1>
+    <div><a> Aqui puedes añadir tus tareas</a></div>
+    <button id="openModal">Añadir Tarea</button>
+
+    <div class="modal" id="taskModal">
+        <div class="modal-content">
+            <span class="close" id="closeModal">&times;</span>
+            <input type="text" id="taskInput" placeholder="Escribe una tarea">
+            <button onclick="addTask()">Añadir Tarea</button>
+        </div>
+    </div>
+
+    <ul id="taskList"></ul>
+
+    <script src="app.js"></script>
+</body>
+</html>
