@@ -1,86 +1,97 @@
-1// Clase que representa una Tarea
 class Task {
-    constructor(description) {
-        this.description = description;
-        this.completed = false;
+    constructor(name) {
+        this.name = name;
     }
 
-    // Método para marcar la tarea como completada
-    toggleComplete() {
-        this.completed = !this.completed;
+    edit(newName) {
+        this.name = newName;
     }
 }
 
-// Clase que maneja las tareas
 class TaskManager {
-    constructor() {
-        this.tasks = [];
+    constructor(taskListElement) {
+        this.tasks = this.loadTasks();
+        this.taskListElement = taskListElement;
+        this.render();
     }
 
-    // Método para añadir una tarea
-    addTask(description) {
-        const newTask = new Task(description);
-        this.tasks.push(newTask);
-        this.renderTasks();
+    addTask(taskName) {
+        const task = new Task(taskName);
+        this.tasks.push(task);
+        this.saveTasks();
+        this.render();
     }
 
-    // Método para eliminar una tarea
-    removeTask(index) {
+    deleteTask(index) {
         this.tasks.splice(index, 1);
-        this.renderTasks();
+        this.saveTasks();
+        this.render();
     }
 
-    // Método para marcar una tarea como completada
-    toggleTaskComplete(index) {
-        this.tasks[index].toggleComplete();
-        this.renderTasks();
+    editTask(index, newName) {
+        this.tasks[index].edit(newName);
+        this.saveTasks();
+        this.render();
     }
 
-    // Método para renderizar las tareas en la interfaz
-    renderTasks() {
-        const taskList = document.getElementById('taskList');
-        taskList.innerHTML = ''; // Limpiar lista antes de renderizar
+    saveTasks() {
+        localStorage.setItem('tasks', JSON.stringify(this.tasks.map(task => ({ name: task.name }))));
+    }
 
+    loadTasks() {
+        const tasks = localStorage.getItem('tasks');
+        const parsedTasks = tasks ? JSON.parse(tasks) : [];
+        return parsedTasks.map(taskData => new Task(taskData.name));
+    }
+
+    render() {
+        this.taskListElement.innerHTML = '';
         this.tasks.forEach((task, index) => {
             const li = document.createElement('li');
-            li.classList.toggle('completed', task.completed);
-            li.innerHTML = `
-                <span>${task.description}</span>
-                <button onclick="taskManager.toggleTaskComplete(${index})">
-                    ${task.completed ? 'Desmarcar' : 'Marcar como completada'}
-                </button>
-                <button onclick="taskManager.removeTask(${index})">Eliminar</button>
-            `;
-            taskList.appendChild(li);
+            li.className = 'task-item';
+
+            const span = document.createElement('span');
+            span.textContent = task.name;
+            li.appendChild(span);
+
+            const editButton = document.createElement('button');
+            editButton.textContent = 'Editar';
+            editButton.className = 'edit';
+            editButton.onclick = () => {
+                const newTaskName = prompt('Edit task:', task.name);
+                if (newTaskName) this.editTask(index, newTaskName);
+            };
+            li.appendChild(editButton);
+
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'Eliminar';
+            deleteButton.className = 'delete';
+            deleteButton.onclick = () => this.deleteTask(index);
+            li.appendChild(deleteButton);
+
+            this.taskListElement.appendChild(li);
         });
     }
 }
 
-// Instanciamos el TaskManager
-const taskManager = new TaskManager();
+const taskInput = document.getElementById('taskName');
+const addTaskButton = document.getElementById('addTask');
+const taskList = document.getElementById('taskList');
 
-// Función que se ejecuta al presionar el botón de añadir tarea
-function addTask() {
-    const taskInput = document.getElementById('taskInput');
-    const taskDescription = taskInput.value.trim();
-    
-    if (taskDescription) {
-        taskManager.addTask(taskDescription);
-        taskInput.value = ''; // Limpiar el campo de entrada
-    }
-}
+const taskManager = new TaskManager(taskList);
 
-
-// Abrir y cerrar el modal
-const modal = document.getElementById('taskModal');
-const openModal = document.getElementById('openModal');
-const closeModal = document.getElementById('closeModal');
-
-openModal.onclick = () => modal.style.display = 'flex';
-closeModal.onclick = () => modal.style.display = 'none';
-
-window.onclick = (event) => {
-    if (event.target === modal) {
-        modal.style.display = 'none';
+addTaskButton.onclick = () => {
+    const taskName = taskInput.value.trim();
+    if (taskName) {
+        taskManager.addTask(taskName);
+        taskInput.value = '';
+    } else {
+        alert('Please enter a task name.');
     }
 };
+
+taskInput.addEventListener('keypress', (event) => {
+    if (event.key === 'Enter') {
+        addTaskButton.click();
+    }
+});
