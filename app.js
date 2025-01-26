@@ -1,10 +1,15 @@
 class Task {
     constructor(name) {
         this.name = name;
+        this.completed = false; // Añadido para controlar el estado de completado
     }
 
     edit(newName) {
         this.name = newName;
+    }
+
+    toggleCompleted() {
+        this.completed = !this.completed;
     }
 }
 
@@ -34,14 +39,20 @@ class TaskManager {
         this.render();
     }
 
+    toggleTaskCompleted(index) {
+        this.tasks[index].toggleCompleted();
+        this.saveTasks();
+        this.render();
+    }
+
     saveTasks() {
-        localStorage.setItem('tasks', JSON.stringify(this.tasks.map(task => ({ name: task.name }))));
+        localStorage.setItem('tasks', JSON.stringify(this.tasks.map(task => ({ name: task.name, completed: task.completed }))));
     }
 
     loadTasks() {
         const tasks = localStorage.getItem('tasks');
         const parsedTasks = tasks ? JSON.parse(tasks) : [];
-        return parsedTasks.map(taskData => new Task(taskData.name));
+        return parsedTasks.map(taskData => new Task(taskData.name, taskData.completed));
     }
 
     render() {
@@ -52,6 +63,9 @@ class TaskManager {
 
             const span = document.createElement('span');
             span.textContent = task.name;
+            if (task.completed) {
+                span.innerHTML += ' &#10003;'; // Añade el checkmark (palomita)
+            }
             li.appendChild(span);
 
             const editButton = document.createElement('button');
@@ -65,8 +79,14 @@ class TaskManager {
             const deleteButton = document.createElement('button');
             deleteButton.textContent = 'Eliminar';
             deleteButton.className = 'delete';
-            deleteButton.onclick = () => this.deleteTask(index);
+            deleteButton.onclick = () => openDeleteModal(index);
             li.appendChild(deleteButton);
+
+            const completeButton = document.createElement('button');
+            completeButton.textContent = task.completed ? 'Desmarcar' : 'Marcar como completada';
+            completeButton.className = 'completed';
+            completeButton.onclick = () => this.toggleTaskCompleted(index);
+            li.appendChild(completeButton);
 
             this.taskListElement.appendChild(li);
         });
@@ -101,26 +121,45 @@ const openEditModal = (task, index) => {
     };
 };
 
-const taskInput = document.getElementById('taskNameInput');
-const addTaskButton = document.getElementById('addTaskBtn');
-const taskList = document.getElementById('taskList');
-const addTaskModal = document.getElementById('addTaskModal');
-const confirmAddTask = document.getElementById('confirmAddTask');
-const cancelAddTask = document.getElementById('cancelAddTask');
+const openDeleteModal = (index) => {
+    const modal = document.getElementById('deleteTaskModal');
+    const confirmDeleteButton = document.getElementById('confirmDelete');
+    const cancelDeleteButton = document.getElementById('cancelDelete');
 
-const taskManager = new TaskManager(taskList);
+    modal.style.display = 'flex';
 
-addTaskButton.onclick = openAddModal;
+    confirmDeleteButton.onclick = () => {
+        taskManager.deleteTask(index);
+        modal.style.display = 'none';
+    };
 
-confirmAddTask.onclick = () => {
-    const taskName = taskInput.value.trim();
+    cancelDeleteButton.onclick = () => {
+        modal.style.display = 'none';
+    };
+};
+
+// Añadir tarea
+const addTaskBtn = document.getElementById('addTaskBtn');
+addTaskBtn.onclick = openAddModal;
+
+// Modal botones
+const confirmAddTaskBtn = document.getElementById('confirmAddTask');
+const cancelAddTaskBtn = document.getElementById('cancelAddTask');
+
+const taskListElement = document.getElementById('taskList');
+const taskManager = new TaskManager(taskListElement);
+
+confirmAddTaskBtn.onclick = () => {
+    const taskNameInput = document.getElementById('taskNameInput');
+    const taskName = taskNameInput.value.trim();
+
     if (taskName) {
         taskManager.addTask(taskName);
-        taskInput.value = '';
-        addTaskModal.style.display = 'none';
+        taskNameInput.value = ''; // Limpiar input
+        document.getElementById('addTaskModal').style.display = 'none';
     }
 };
 
-cancelAddTask.onclick = () => {
-    addTaskModal.style.display = 'none';
+cancelAddTaskBtn.onclick = () => {
+    document.getElementById('addTaskModal').style.display = 'none';
 };
