@@ -58,8 +58,7 @@ class TaskManager {
             editButton.textContent = 'Editar';
             editButton.className = 'edit';
             editButton.onclick = () => {
-                const newTaskName = prompt('Edit task:', task.name);
-                if (newTaskName) this.editTask(index, newTaskName);
+                openEditModal(task, index);
             };
             li.appendChild(editButton);
 
@@ -74,24 +73,54 @@ class TaskManager {
     }
 }
 
-const taskInput = document.getElementById('taskName');
-const addTaskButton = document.getElementById('addTask');
+// Función para abrir el modal de añadir tarea
+const openAddModal = () => {
+    const modal = document.getElementById('addTaskModal');
+    modal.style.display = 'flex';
+};
+
+const openEditModal = (task, index) => {
+    const modal = document.getElementById('editTaskModal');
+    const input = document.getElementById('editTaskName');
+    const confirmButton = document.getElementById('confirmEdit');
+    const cancelButton = document.getElementById('cancelEdit');
+
+    input.value = task.name;
+    modal.style.display = 'flex';
+
+    confirmButton.onclick = () => {
+        const newTaskName = input.value.trim();
+        if (newTaskName) {
+            taskManager.editTask(index, newTaskName);
+            modal.style.display = 'none';
+        }
+    };
+
+    cancelButton.onclick = () => {
+        modal.style.display = 'none';
+    };
+};
+
+const taskInput = document.getElementById('taskNameInput');
+const addTaskButton = document.getElementById('addTaskBtn');
 const taskList = document.getElementById('taskList');
+const addTaskModal = document.getElementById('addTaskModal');
+const confirmAddTask = document.getElementById('confirmAddTask');
+const cancelAddTask = document.getElementById('cancelAddTask');
 
 const taskManager = new TaskManager(taskList);
 
-addTaskButton.onclick = () => {
+addTaskButton.onclick = openAddModal;
+
+confirmAddTask.onclick = () => {
     const taskName = taskInput.value.trim();
     if (taskName) {
         taskManager.addTask(taskName);
         taskInput.value = '';
-    } else {
-        alert('Please enter a task name.');
+        addTaskModal.style.display = 'none';
     }
 };
 
-taskInput.addEventListener('keypress', (event) => {
-    if (event.key === 'Enter') {
-        addTaskButton.click();
-    }
-});
+cancelAddTask.onclick = () => {
+    addTaskModal.style.display = 'none';
+};
