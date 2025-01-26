@@ -3,24 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AbogadosAust</title>
+    <title>Task Manager</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <h1>Administrador de Tareas</h1>
 
-    <h1>Lista de Tareas de los abogados</h1>
-    <div><a> Aqui puedes añadir tus tareas</a></div>
-    <button id="openModal">Añadir Tarea</button>
+    <!-- Botón para añadir tarea -->
+    <button id="addTaskBtn">Añadir Tarea</button>
 
-    <div class="modal" id="taskModal">
+    <!-- Lista de tareas -->
+    <ul id="taskList"></ul>
+
+    <!-- Modal para añadir tarea -->
+    <div id="addTaskModal" class="modal">
         <div class="modal-content">
-            <span class="close" id="closeModal">&times;</span>
-            <input type="text" id="taskInput" placeholder="Escribe una tarea">
-            <button onclick="addTask()">Añadir Tarea</button>
+            <h2>Añadir Nueva Tarea</h2>
+            <input type="text" id="taskNameInput" placeholder="Nombre de la tarea">
+            <button class="modal-button confirm" id="confirmAddTask">Añadir</button>
+            <button class="modal-button cancel" id="cancelAddTask">Cancelar</button>
         </div>
     </div>
 
-    <ul id="taskList"></ul>
+    <!-- Modal para editar tarea -->
+    <div id="editTaskModal" class="modal">
+        <div class="modal-content">
+            <h2>Editar Tarea</h2>
+            <input type="text" id="editTaskName" placeholder="Nuevo nombre de tarea">
+            <button class="modal-button confirm" id="confirmEdit">Guardar</button>
+            <button class="modal-button cancel" id="cancelEdit">Cancelar</button>
+        </div>
+    </div>
 
-    <script src="app.js"></script> 
+    <script src="app.js"></script>
 </body>
 </html>
